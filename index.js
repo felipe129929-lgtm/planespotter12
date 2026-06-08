@@ -9,6 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = Number(process.env.PORT || 10000);
+const PUBLIC_BASE_URL =
+  (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/+$/, "");
+
+// Serve local airline logo files from the "Logos" folder.
+app.use("/logos", express.static("Logos"));
 
 function toRad(v) {
   return (v * Math.PI) / 180;
@@ -29,137 +34,77 @@ function kmToNm(km) {
 }
 
 function callsignPrefix(callsign = "") {
-  // Callsign prefix extraction: DAL2526 -> DAL, UAL674 -> UAL, AAL1643 -> AAL.
   const match = callsign.trim().toUpperCase().match(/^[A-Z]{2,3}/);
   return match ? match[0] : "";
 }
 
-const GENERIC_AIRLINE_VALUES = new Set(["", "Unknown", "Unknown Airline", "United States"]);
+function cleanText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
 
-// Airline logo mapping: all known logos are static URLs configured in this table.
+function isGenericAirlineName(name) {
+  const genericValues = new Set(["", "Unknown", "Unknown Airline", "United States"]);
+  return genericValues.has(cleanText(name));
+}
+
+function logoUrl(filename) {
+  return `${PUBLIC_BASE_URL}/logos/${filename}`;
+}
+
+// Airline logo mapping now uses your local logo files served by Express.
 const AIRLINE_BRANDING_BY_PREFIX = {
   DAL: {
     name: "Delta Air Lines",
-    logoUrl: "https://cdn.simpleicons.org/delta/003366"
-  },
-  UAL: {
-    name: "United Airlines",
-    logoUrl: "https://cdn.simpleicons.org/unitedairlines/002244"
+    logoUrl: logoUrl("delta.png")
   },
   AAL: {
     name: "American Airlines",
-    logoUrl: "https://cdn.simpleicons.org/americanairlines/0078D2"
+    logoUrl: logoUrl("american.png")
   },
-  JBU: {
-    name: "JetBlue",
-    logoUrl: "https://cdn.simpleicons.org/jetblue/001E59"
-  },
-  SWA: {
-    name: "Southwest Airlines",
-    logoUrl: "https://cdn.simpleicons.org/southwestairlines/304CB2"
-  },
-  EDV: {
-    name: "Endeavor Air",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Endeavor_Air_logo.svg"
-  },
-  RPA: {
-    name: "Republic Airways",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/Republic_Airways_2019_Logo.svg"
-  },
-  FFT: {
-    name: "Frontier Airlines",
-    logoUrl: "https://cdn.simpleicons.org/frontierairlines/0D7F40"
-  },
-  ASA: {
-    name: "Alaska Airlines",
-    logoUrl: "https://cdn.simpleicons.org/alaskaairlines/01426A"
-  },
-  NKS: {
-    name: "Spirit Airlines",
-    logoUrl: "https://cdn.simpleicons.org/spiritairlines/FFEC00"
-  },
-  JIA: {
-    name: "PSA Airlines",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/PSA_Airlines_Logo.svg"
-  },
-  EJA: {
-    name: "NetJets",
-    logoUrl: "https://cdn.simpleicons.org/netjets/000000"
-  },
-  ABX: {
-    name: "ABX Air",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/ABX_Air_Logo.png"
-  },
-  GJS: {
-    name: "GoJet Airlines",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/GoJet_logo.gif"
-  },
-  CKS: {
-    name: "Kalitta Air",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Kalitta_Air_logo.svg"
-  },
-  MXY: {
-    name: "Breeze Airways",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Breeze_Airways.svg"
-  },
-  THY: {
-    name: "Turkish Airlines",
-    logoUrl: "https://cdn.simpleicons.org/turkishairlines/C70A0C"
-  },
-  EIN: {
-    name: "Aer Lingus",
-    logoUrl: "https://cdn.simpleicons.org/aerlingus/006272"
-  },
-  ACA: {
-    name: "Air Canada",
-    logoUrl: "https://cdn.simpleicons.org/aircanada/F01428"
-  },
-  CES: {
-    name: "China Eastern Airlines",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/China_Eastern_Airlines_Logo.svg"
-  },
-  CAL: {
-    name: "China Airlines",
-    logoUrl: "https://cdn.simpleicons.org/chinaairlines/AA0000"
-  },
-  MSR: {
-    name: "EgyptAir",
-    logoUrl: "https://cdn.simpleicons.org/egyptair/143B85"
-  },
-  VIR: {
-    name: "Virgin Atlantic",
-    logoUrl: "https://cdn.simpleicons.org/virginatlantic/DA0530"
+  UAL: {
+    name: "United Airlines",
+    logoUrl: logoUrl("United.png")
   },
   ARG: {
     name: "Aerolineas Argentinas",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/Logo_Aerol%C3%ADneas_Argentinas_(2010).svg"
-  },
-  ANS: {
-    name: "Andes Lineas Aereas",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/Andes_L%C3%ADneas_A%C3%A9reas_Logo.svg"
-  },
-  JES: {
-    name: "JetSmart Argentina",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Logo_JetSmart.svg"
-  },
-  JAT: {
-    name: "JetSmart",
-    logoUrl: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Logo_JetSmart.svg"
+    logoUrl: logoUrl("aerolineasargentinas.png")
   },
   FBZ: {
     name: "Flybondi",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/Flybondi_logo_simple.svg"
+    logoUrl: logoUrl("Flybondi.png")
   },
-  AUT: {
-    name: "Austral Lineas Aereas",
-    logoUrl:
-      "https://commons.wikimedia.org/wiki/Special:Redirect/file/Austral_L%C3%ADneas_A%C3%A9reas.svg"
-  }
+  JAT: {
+    name: "JetSmart",
+    logoUrl: logoUrl("jetsmart.png")
+  },
+  JES: {
+    name: "JetSmart Argentina",
+    logoUrl: logoUrl("jetsmart.png")
+  },
+
+  // Known airlines without local logo files yet:
+  JBU: { name: "JetBlue", logoUrl: "" },
+  SWA: { name: "Southwest Airlines", logoUrl: "" },
+  EDV: { name: "Endeavor Air", logoUrl: "" },
+  RPA: { name: "Republic Airways", logoUrl: "" },
+  FFT: { name: "Frontier Airlines", logoUrl: "" },
+  ASA: { name: "Alaska Airlines", logoUrl: "" },
+  NKS: { name: "Spirit Airlines", logoUrl: "" },
+  JIA: { name: "PSA Airlines", logoUrl: "" },
+  EJA: { name: "NetJets", logoUrl: "" },
+  ABX: { name: "ABX Air", logoUrl: "" },
+  GJS: { name: "GoJet Airlines", logoUrl: "" },
+  CKS: { name: "Kalitta Air", logoUrl: "" },
+  MXY: { name: "Breeze Airways", logoUrl: "" },
+  THY: { name: "Turkish Airlines", logoUrl: "" },
+  EIN: { name: "Aer Lingus", logoUrl: "" },
+  ACA: { name: "Air Canada", logoUrl: "" },
+  CES: { name: "China Eastern Airlines", logoUrl: "" },
+  CAL: { name: "China Airlines", logoUrl: "" },
+  MSR: { name: "EgyptAir", logoUrl: "" },
+  VIR: { name: "Virgin Atlantic", logoUrl: "" },
+  ANS: { name: "Andes Lineas Aereas", logoUrl: "" },
+  AUT: { name: "Austral Lineas Aereas", logoUrl: "" }
 };
 
 const AIRCRAFT_TYPE_BY_ICAO = {
@@ -206,29 +151,17 @@ function getAirlineBranding(callsign, fallback = "Unknown Airline") {
     };
   }
 
-  // Airline name mapping: mapped prefixes override generic country/source values.
   return {
     name: isGenericAirlineName(safeFallback) ? mappedAirline.name : safeFallback,
-    logoUrl: mappedAirline.logoUrl
+    logoUrl: mappedAirline.logoUrl || ""
   };
-}
-
-function selectAircraftType(ac) {
-  // Aircraft type selection: Airplanes.live desc first, then t, then Unknown Type.
-  const desc = cleanText(ac.desc);
-  if (desc) return formatAircraftType(desc);
-
-  const icaoType = cleanText(ac.t).toUpperCase();
-  if (!icaoType) return "Unknown Type";
-
-  return AIRCRAFT_TYPE_BY_ICAO[icaoType] || icaoType;
 }
 
 function formatAircraftType(value) {
   const cleaned = cleanText(value)
     .replace(/\s+/g, " ")
-    .replace(/\b([A-Z])-(\d{3})\b/g, "$1$2")
-    .replace(/\bA-(\d{3})\b/g, "A$1");
+    .replace(/\b([A-Z])-(\d{3})\b/g, "\$1\$2")
+    .replace(/\bA-(\d{3})\b/g, "A\$1");
 
   if (!cleaned) return "Unknown Type";
 
@@ -240,8 +173,8 @@ function formatAircraftType(value) {
     return cleaned
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase())
-      .replace(/\bA(\d{3})\b/g, "A$1")
-      .replace(/\bB(\d{3})\b/g, "B$1")
+      .replace(/\bA(\d{3})\b/g, "A\$1")
+      .replace(/\bB(\d{3})\b/g, "B\$1")
       .replace(/\bCrj\b/g, "CRJ")
       .replace(/\bErj\b/g, "ERJ");
   }
@@ -249,12 +182,14 @@ function formatAircraftType(value) {
   return cleaned;
 }
 
-function cleanText(value) {
-  return typeof value === "string" ? value.trim() : "";
-}
+function selectAircraftType(ac) {
+  const desc = cleanText(ac.desc);
+  if (desc) return formatAircraftType(desc);
 
-function isGenericAirlineName(name) {
-  return GENERIC_AIRLINE_VALUES.has(cleanText(name));
+  const icaoType = cleanText(ac.t).toUpperCase();
+  if (!icaoType) return "Unknown Type";
+
+  return AIRCRAFT_TYPE_BY_ICAO[icaoType] || icaoType;
 }
 
 function extractPosition(ac) {
@@ -307,7 +242,7 @@ function normalizeAircraft(ac, observerLat, observerLng, radiusKm) {
     destination: "Unknown",
     altitudeFt: Number.isFinite(ac.alt_baro) ? ac.alt_baro : null,
     speedKt: Number.isFinite(ac.gs) ? ac.gs : null,
-    headingDeg: Number.isFinite(ac.track) ? ac.track : 0,
+    headingDeg: Number.isFinite(ac.track) ? ac.track : null,
     lat: pos.lat,
     lng: pos.lng,
     lastSeen: lastSeenIso,
@@ -325,7 +260,8 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     service: "PlaneSpotter backend (Airplanes.live)",
-    now: new Date().toISOString()
+    now: new Date().toISOString(),
+    publicBaseUrl: PUBLIC_BASE_URL
   });
 });
 
@@ -380,4 +316,5 @@ app.get("/api/aircraft/nearby", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`PlaneSpotter backend listening on port ${PORT}`);
+  console.log(`Serving logos from: ${PUBLIC_BASE_URL}/logos/...`);
 });
