@@ -1,6 +1,54 @@
 {
-  "ARG1690": { "origin": "AEP", "destination": "BRC", "originName": "Buenos Aires", "destName": "Bariloche" },
-  "FBZ5153": { "origin": "AEP", "destination": "COR", "originName": "Buenos Aires", "destName": "Cordoba" },
-  "JES3150": { "origin": "SCL", "destination": "MDZ", "originName": "Santiago", "destName": "Mendoza" },
-  "ARG1240": { "origin": "AEP", "destination": "MDZ", "originName": "Buenos Aires", "destName": "Mendoza" }
+  "ARG1690": { "origin": "Buenos Aires (AEP)", "destination": "Bariloche (BRC)" },
+  "ARG1691": { "origin": "Bariloche (BRC)", "destination": "Buenos Aires (AEP)" },
+  "ARG1420": { "origin": "Buenos Aires (AEP)", "destination": "Mendoza (MDZ)" },
+  "ARG1421": { "origin": "Mendoza (MDZ)", "destination": "Buenos Aires (AEP)" },
+  "ARG1500": { "origin": "Buenos Aires (AEP)", "destination": "Córdoba (COR)" },
+  "ARG1501": { "origin": "Córdoba (COR)", "destination": "Buenos Aires (AEP)" },
+  "ARG1720": { "origin": "Buenos Aires (AEP)", "destination": "Iguazú (IGR)" },
+  "ARG1721": { "origin": "Iguazú (IGR)", "destination": "Buenos Aires (AEP)" },
+  "ARG1884": { "origin": "Buenos Aires (AEP)", "destination": "Ushuaia (USH)" },
+  "ARG1885": { "origin": "Ushuaia (USH)", "destination": "Buenos Aires (AEP)" },
+  "ARG1240": { "origin": "Buenos Aires (AEP)", "destination": "São Paulo (GRU)" },
+  "ARG1302": { "origin": "Buenos Aires (EZE)", "destination": "Miami (MIA)" },
+  "ARG1303": { "origin": "Miami (MIA)", "destination": "Buenos Aires (EZE)" },
+
+  "FBZ5000": { "origin": "Buenos Aires (AEP)", "destination": "Córdoba (COR)" },
+  "FBZ5001": { "origin": "Córdoba (COR)", "destination": "Buenos Aires (AEP)" },
+  "FBZ5220": { "origin": "Buenos Aires (AEP)", "destination": "Bariloche (BRC)" },
+  "FBZ5221": { "origin": "Bariloche (BRC)", "destination": "Buenos Aires (AEP)" },
+  "FBZ5100": { "origin": "Buenos Aires (AEP)", "destination": "Mendoza (MDZ)" },
+  "FBZ5101": { "origin": "Mendoza (MDZ)", "destination": "Buenos Aires (AEP)" },
+  "FBZ5444": { "origin": "Buenos Aires (AEP)", "destination": "Ushuaia (USH)" },
+  "FBZ5153": { "origin": "Buenos Aires (AEP)", "destination": "Cordoba (COR)" },
+
+  "JES3150": { "origin": "Santiago (SCL)", "destination": "Mendoza (MDZ)" },
+  "JES3440": { "origin": "Buenos Aires (AEP)", "destination": "Salta (SLA)" },
+  "JES3441": { "origin": "Salta (SLA)", "destination": "Buenos Aires (AEP)" },
+  "JES3390": { "origin": "Buenos Aires (AEP)", "destination": "Bariloche (BRC)" },
+  "JES3240": { "origin": "Buenos Aires (AEP)", "destination": "Neuquén (NQN)" },
+  "JES3100": { "origin": "Buenos Aires (AEP)", "destination": "Mendoza (MDZ)" },
+
+  "LAN411": { "origin": "Santiago (SCL)", "destination": "Buenos Aires (AEP)" },
+  "LPE2368": { "origin": "Lima (LIM)", "destination": "Buenos Aires (EZE)" },
+  "TAM8015": { "origin": "São Paulo (GRU)", "destination": "Buenos Aires (EZE)" },
+
+  "AAL908": { "origin": "Buenos Aires (EZE)", "destination": "Miami (MIA)" },
+  "AAL900": { "origin": "Miami (MIA)", "destination": "Buenos Aires (EZE)" },
+  "AAL907": { "origin": "Miami (MIA)", "destination": "Buenos Aires (EZE)" },
+  "DAL101": { "origin": "Atlanta (ATL)", "destination": "Buenos Aires (EZE)" },
+  "DAL110": { "origin": "Buenos Aires (EZE)", "destination": "Atlanta (ATL)" },
+  "UAL819": { "origin": "Houston (IAH)", "destination": "Buenos Aires (EZE)" },
+  "UAL818": { "origin": "Buenos Aires (EZE)", "destination": "Houston (IAH)" },
+
+  "IBE6844": { "origin": "Buenos Aires (EZE)", "destination": "Madrid (MAD)" },
+  "IBE6845": { "origin": "Madrid (MAD)", "destination": "Buenos Aires (EZE)" },
+  "AFR228": { "origin": "Paris (CDG)", "destination": "Buenos Aires (EZE)" },
+  "AFR229": { "origin": "Buenos Aires (EZE)", "destination": "Paris (CDG)" },
+  "KLM701": { "origin": "Amsterdam (AMS)", "destination": "Buenos Aires (EZE)" },
+  "KLM702": { "origin": "Buenos Aires (EZE)", "destination": "Amsterdam (AMS)" },
+
+  "AVA260": { "origin": "Bogotá (BOG)", "destination": "Buenos Aires (EZE)" },
+  "CMP454": { "origin": "Panama City (PTY)", "destination": "Buenos Aires (EZE)" },
+  "GLO7650": { "origin": "Rio de Janeiro (GIG)", "destination": "Buenos Aires (AEP)" }
 }
