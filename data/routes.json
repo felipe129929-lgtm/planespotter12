@@ -1,0 +1,6 @@
+{
+  "ARG1690": { "origin": "AEP", "destination": "BRC", "originName": "Buenos Aires", "destName": "Bariloche" },
+  "FBZ5153": { "origin": "AEP", "destination": "COR", "originName": "Buenos Aires", "destName": "Cordoba" },
+  "JES3150": { "origin": "SCL", "destination": "MDZ", "originName": "Santiago", "destName": "Mendoza" },
+  "ARG1240": { "origin": "AEP", "destination": "MDZ", "originName": "Buenos Aires", "destName": "Mendoza" }
+}
