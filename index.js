@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from "fs"; // NEW: For reading the routes file
+import path from "path"; // NEW: For file paths
+import { fileURLToPath } from 'url'; // NEW: For ES Modules paths
 
 dotenv.config();
 
@@ -8,12 +11,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// NEW: Setup for loading local files in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const PORT = Number(process.env.PORT || 10000);
 const PUBLIC_BASE_URL =
   (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/+$/, "");
 
 // Serve local airline logo files from the "Logos" folder.
 app.use("/logos", express.static("Logos"));
+
+// --- NEW: ROUTE DATABASE LOADING ---
+let ROUTES_DATABASE = {};
+try {
+  const routesPath = path.join(__dirname, "data", "routes.json");
+  if (fs.existsSync(routesPath)) {
+    const rawData = fs.readFileSync(routesPath, "utf8");
+    ROUTES_DATABASE = JSON.parse(rawData);
+    console.log("✅ Route database loaded");
+  } else {
+    console.log("⚠️ data/routes.json not found, routes will show as Unknown");
+  }
+} catch (err) {
+  console.error("❌ Error loading routes.json:", err);
+}
+// ------------------------------------
 
 function toRad(v) {
   return (v * Math.PI) / 180;
@@ -51,38 +74,14 @@ function logoUrl(filename) {
   return `${PUBLIC_BASE_URL}/logos/${filename}`;
 }
 
-// Airline logo mapping now uses your local logo files served by Express.
 const AIRLINE_BRANDING_BY_PREFIX = {
-  DAL: {
-    name: "Delta Air Lines",
-    logoUrl: logoUrl("delta.png")
-  },
-  AAL: {
-    name: "American Airlines",
-    logoUrl: logoUrl("american.png")
-  },
-  UAL: {
-    name: "United Airlines",
-    logoUrl: logoUrl("United.png")
-  },
-  ARG: {
-    name: "Aerolineas Argentinas",
-    logoUrl: logoUrl("aerolineasargentinas.png")
-  },
-  FBZ: {
-    name: "Flybondi",
-    logoUrl: logoUrl("Flybondi.png")
-  },
-  JAT: {
-    name: "JetSmart",
-    logoUrl: logoUrl("jetsmart.png")
-  },
-  JES: {
-    name: "JetSmart Argentina",
-    logoUrl: logoUrl("jetsmart.png")
-  },
-
-  // Known airlines without local logo files yet:
+  DAL: { name: "Delta Air Lines", logoUrl: logoUrl("delta.png") },
+  AAL: { name: "American Airlines", logoUrl: logoUrl("american.png") },
+  UAL: { name: "United Airlines", logoUrl: logoUrl("United.png") },
+  ARG: { name: "Aerolineas Argentinas", logoUrl: logoUrl("aerolineasargentinas.png") },
+  FBZ: { name: "Flybondi", logoUrl: logoUrl("Flybondi.png") },
+  JAT: { name: "JetSmart", logoUrl: logoUrl("jetsmart.png") },
+  JES: { name: "JetSmart Argentina", logoUrl: logoUrl("jetsmart.png") },
   JBU: { name: "JetBlue", logoUrl: "" },
   SWA: { name: "Southwest Airlines", logoUrl: "" },
   EDV: { name: "Endeavor Air", logoUrl: "" },
@@ -160,8 +159,8 @@ function getAirlineBranding(callsign, fallback = "Unknown Airline") {
 function formatAircraftType(value) {
   const cleaned = cleanText(value)
     .replace(/\s+/g, " ")
-    .replace(/\b([A-Z])-(\d{3})\b/g, "\$1\$2")
-    .replace(/\bA-(\d{3})\b/g, "A\$1");
+    .replace(/\b([A-Z])-(\d{3})\b/g, "\\$1\\$2")
+    .replace(/\bA-(\d{3})\b/g, "A\\$1");
 
   if (!cleaned) return "Unknown Type";
 
@@ -173,8 +172,8 @@ function formatAircraftType(value) {
     return cleaned
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase())
-      .replace(/\bA(\d{3})\b/g, "A\$1")
-      .replace(/\bB(\d{3})\b/g, "B\$1")
+      .replace(/\bA(\d{3})\b/g, "A\\$1")
+      .replace(/\bB(\d{3})\b/g, "B\\$1")
       .replace(/\bCrj\b/g, "CRJ")
       .replace(/\bErj\b/g, "ERJ");
   }
@@ -223,6 +222,10 @@ function normalizeAircraft(ac, observerLat, observerLng, radiusKm) {
   const registration = ac.r || ac.hex || "Unknown";
   const airlineBranding = getAirlineBranding(callsign, "Unknown Airline");
 
+  // --- NEW: ROUTE LOOKUP LOGIC ---
+  const route = ROUTES_DATABASE[callsign] || { origin: "Unknown", destination: "Unknown" };
+  // -------------------------------
+
   let lastSeenIso = new Date().toISOString();
 
   if (Number.isFinite(ac.seen)) {
@@ -238,8 +241,8 @@ function normalizeAircraft(ac, observerLat, observerLng, radiusKm) {
     registration,
     airlineName: airlineBranding.name,
     airlineLogoUrl: airlineBranding.logoUrl,
-    origin: "Unknown",
-    destination: "Unknown",
+    origin: route.origin,           // CHANGED: Uses lookup
+    destination: route.destination, // CHANGED: Uses lookup
     altitudeFt: Number.isFinite(ac.alt_baro) ? ac.alt_baro : null,
     speedKt: Number.isFinite(ac.gs) ? ac.gs : null,
     headingDeg: Number.isFinite(ac.track) ? ac.track : null,
